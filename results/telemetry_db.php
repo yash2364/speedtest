@@ -48,7 +48,7 @@ function getPdo($returnErrorMessage = false)
 			if (!$MsSql_WindowsAuthentication and
 			    !isset(
 						$MsSql_username,
-						$MsSql_password,
+						$MsSql_password
 						)
 				) {
 				if($returnErrorMessage){
