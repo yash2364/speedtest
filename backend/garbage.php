@@ -6,6 +6,10 @@
 @ini_set('output_handler', '');
 
 /**
+ * Get the chunk count from the query parameter.
+ * Default is 4 if the parameter is invalid or not set.
+ * Maximum allowed value is 1024.
+ *
  * @return int
  */
 function getChunkCount()
@@ -26,6 +30,8 @@ function getChunkCount()
 }
 
 /**
+ * Send the necessary headers for file download and CORS.
+ *
  * @return void
  */
 function sendHeaders()
@@ -35,6 +41,7 @@ function sendHeaders()
     if (isset($_GET['cors'])) {
         header('Access-Control-Allow-Origin: *');
         header('Access-Control-Allow-Methods: GET, POST');
+        header('Access-Control-Allow-Headers: Content-Encoding, Content-Type');
     }
 
     // Indicate a file download
@@ -55,9 +62,12 @@ $chunks = getChunkCount();
 // Generate data
 $data = openssl_random_pseudo_bytes(1048576);
 
-// Deliver chunks of 1048576 bytes
+// Send headers
 sendHeaders();
+
+// Deliver chunks of 1048576 bytes
 for ($i = 0; $i < $chunks; $i++) {
     echo $data;
     flush();
 }
+?>
