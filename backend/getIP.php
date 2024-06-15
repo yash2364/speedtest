@@ -190,7 +190,6 @@ function getIsp($rawIspInfo)
             && array_key_exists('name', $rawIspInfo['asn'])
             && is_string($rawIspInfo['asn']['name'])
         ) {
-            // Remove AS##### from ISP name, if present
             return $rawIspInfo['asn']['name'];
         }
     }
@@ -301,108 +300,4 @@ function getDistance($rawIspInfo)
  *
  * @return string
  */
-function calculateDistance($clientLocation, $serverLocation, $unit)
-{
-    list($clientLatitude, $clientLongitude) = explode(',', $clientLocation);
-    list($serverLatitude, $serverLongitude) = explode(',', $serverLocation);
-    $dist = distance(
-        $clientLatitude,
-        $clientLongitude,
-        $serverLatitude,
-        $serverLongitude
-    );
-
-    if ('mi' === $unit) {
-        $dist /= 1.609344;
-        $dist = round($dist, -1);
-        if ($dist < 15) {
-            $dist = '<15';
-        }
-
-        return $dist . ' mi';
-    }
-
-    if ('km' === $unit) {
-        $dist = round($dist, -1);
-        if ($dist < 20) {
-            $dist = '<20';
-        }
-
-        return $dist . ' km';
-    }
-
-    return null;
-}
-
-/**
- * @return void
- */
-function sendHeaders()
-{
-    header('Content-Type: application/json; charset=utf-8');
-
-    if (isset($_GET['cors'])) {
-        header('Access-Control-Allow-Origin: *');
-        header('Access-Control-Allow-Methods: GET, POST');
-    }
-
-    header('Cache-Control: no-store, no-cache, must-revalidate, max-age=0, s-maxage=0');
-    header('Cache-Control: post-check=0, pre-check=0', false);
-    header('Pragma: no-cache');
-}
-
-/**
- * @param string $ip
- * @param string|null $ipInfo
- * @param string|null $distance
- * @param array|null $rawIspInfo
- *
- * @return void
- */
-function sendResponse(
-    $ip,
-    $ipInfo = null,
-    $distance = null,
-    $rawIspInfo = null
-) {
-    $processedString = $ip;
-    if (is_string($ipInfo)) {
-        $processedString .= ' - ' . $ipInfo;
-    }
-
-    if (
-        is_array($rawIspInfo)
-        && array_key_exists('country', $rawIspInfo)
-    ) {
-        $processedString .= ', ' . $rawIspInfo['country'];
-    }
-    if (is_string($distance)) {
-        $processedString .= ' (' . $distance . ')';
-    }
-
-    sendHeaders();
-    echo json_encode([
-        'processedString' => $processedString,
-        'rawIspInfo' => $rawIspInfo ?: '',
-    ]);
-}
-
-$ip = getClientIp();
-
-$localIpInfo = getLocalOrPrivateIpInfo($ip);
-// local ip, no need to fetch further information
-if (is_string($localIpInfo)) {
-    sendResponse($ip, $localIpInfo);
-    exit;
-}
-
-if (!isset($_GET['isp'])) {
-    sendResponse($ip);
-    exit;
-}
-
-$rawIspInfo = getIspInfo($ip);
-$isp = getIsp($rawIspInfo);
-$distance = getDistance($rawIspInfo);
-
-sendResponse($ip, $isp, $distance, $rawIspInfo);
+function calculateDistance($client
